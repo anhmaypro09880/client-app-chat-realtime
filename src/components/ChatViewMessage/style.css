@@ -1,0 +1,19 @@
+.chat-view-message {
+    height: 84vh;
+    max-height: 100%;
+    background-color: #eeeff2;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+.m-msg {
+    float: right;
+    clear: both;
+}
+.msg {
+    float: left;
+    clear: both;
+}
+#style2::-webkit-scrollbar {
+    width: 0px;
+    background-color: #f5f5f5;
+}
