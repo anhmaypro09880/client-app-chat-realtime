@@ -9,3 +9,4 @@ export const recieveMessageRoute = `${host}/api/messages/getmsg`;
 export const setAvatarRoute = `${host}/api/auth/setavatar`;
 
 export const imageMessageSend = `${host}/api/messages/image-message-send`;
+export const fileMessageSend = `${host}/api/messages/file-message-send`;

@@ -25,7 +25,6 @@ export default function ChatView({ socket, currentChat, currentUser }) {
                 });
 
                 setMessages(response.data);
-                // console.log(response.data);
             }
         }
         fetchData();
@@ -50,6 +49,7 @@ export default function ChatView({ socket, currentChat, currentUser }) {
             from: data._id,
             message: msg,
             image: "",
+            files: "",
         });
         await axios.post(sendMessageRoute, {
             from: data._id,
@@ -58,7 +58,8 @@ export default function ChatView({ socket, currentChat, currentUser }) {
         });
 
         const msgs = [...messages];
-        msgs.push({ fromSelf: true, message: msg, image: "" });
+
+        msgs.push({ fromSelf: true, message: msg, image: "", files: "" });
 
         setMessages(msgs);
     };
@@ -68,18 +69,28 @@ export default function ChatView({ socket, currentChat, currentUser }) {
             const getCurenUser = setInterval(() => {
                 if (socket.current) {
                     socket.current.on("msg-recieve", (data) => {
-                        // console.log("Nghe Message");
-                        if (data.message === "") {
+                        if (data.files === "" && data.message === "") {
                             setArrivalMessage({
                                 fromSelf: false,
                                 message: "",
                                 image: data.image,
+                                files: "",
                             });
-                        } else {
+                        }
+                        if (data.message === "" && data.image === "") {
+                            setArrivalMessage({
+                                fromSelf: false,
+                                message: "",
+                                image: "",
+                                files: data.files,
+                            });
+                        }
+                        if (data.image === "" && data.files === "") {
                             setArrivalMessage({
                                 fromSelf: false,
                                 message: data.message,
                                 image: "",
+                                files: "",
                             });
                         }
                     });

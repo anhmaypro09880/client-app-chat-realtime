@@ -34,6 +34,7 @@ export default function ChatViewMessage({ messages }) {
                 key={message.id}
                 text={message.message}
                 image={message.image}
+                files={message.files}
                 fromSelf={message.fromSelf}
                 photoURL={message.photoURL}
                 displayName={message.displayName}

@@ -4,6 +4,7 @@ import Picker from "emoji-picker-react";
 import styled from "styled-components";
 import { DiDatabase } from "react-icons/di";
 import axios from "axios";
+import { videoTagString, VideoTag } from "react-video-tag";
 
 import {
     LinkOutlined,
@@ -12,7 +13,7 @@ import {
 } from "@ant-design/icons";
 // import Picker from "emoji-picker-react";
 import "./style.css";
-import { imageMessageSend } from "../../utils/APIRoutes";
+import { imageMessageSend, fileMessageSend } from "../../utils/APIRoutes";
 
 export default function ChatViewInput({
     handleSendMsg,
@@ -50,6 +51,15 @@ export default function ChatViewInput({
     const imageSend = async (e) => {
         e.preventDefault();
         if (e.target.files.length !== 0) {
+            let fileArray = e.target.files;
+            const formData = new FormData();
+
+            const imagesArray = [];
+            for (let i = 0; i < fileArray.length; i++) {
+                imagesArray.push(fileArray[i]);
+                formData.append("images", fileArray[i]);
+            }
+
             const imageName = e.target.files[0].name;
             const newImageName = Date.now() + imageName;
             const file = URL.createObjectURL(e.target.files[0]);
@@ -57,29 +67,78 @@ export default function ChatViewInput({
             const data = await JSON.parse(
                 localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
             );
-            const formData = new FormData();
-            formData.append("images", e.target.files[0]);
+
             formData.append("senderName", data._id);
             formData.append("imageName", newImageName);
             formData.append("reseverId", currentChat._id);
             formData.append("file", file);
 
-            const msgs = [...messages];
-
-            msgs.push({ fromSelf: true, message: "", image: file });
-
-            setMessages(msgs);
-
             const response = await axios.post(imageMessageSend, formData);
-
-            console.log(response.data.data);
-            // setMessages(msgs);
 
             socket.current.emit("send-msg", {
                 to: currentChat._id,
                 from: data._id,
                 message: "",
                 image: response.data.data,
+                files: "",
+            });
+
+            const msgs = [...messages];
+
+            msgs.push({
+                fromSelf: true,
+                message: "",
+                image: response.data.data,
+                files: "",
+            });
+
+            setMessages(msgs);
+        }
+    };
+
+    const fileSend = async (e) => {
+        e.preventDefault();
+        if (e.target.files.length !== 0) {
+            let fileArray = e.target.files;
+            const formData = new FormData();
+            const imagesArray = [];
+            for (let i = 0; i < fileArray.length; i++) {
+                imagesArray.push(fileArray[i]);
+                formData.append("images", fileArray[i]);
+            }
+
+            const imageName = e.target.files[0].name;
+            const newImageName = Date.now() + imageName;
+            const file = URL.createObjectURL(e.target.files[0]);
+
+            const data = await JSON.parse(
+                localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+            );
+
+            formData.append("senderName", data._id);
+            formData.append("imageName", newImageName);
+            formData.append("reseverId", currentChat._id);
+            formData.append("file", file);
+
+            const response = await axios.post(fileMessageSend, formData);
+
+            const msgs = [...messages];
+
+            msgs.push({
+                fromSelf: true,
+                message: "",
+                image: "",
+                files: response.data.data,
+            });
+
+            setMessages(msgs);
+
+            socket.current.emit("send-msg", {
+                to: currentChat._id,
+                from: data._id,
+                message: "",
+                image: "",
+                files: response.data.data,
             });
         }
     };
@@ -104,30 +163,41 @@ export default function ChatViewInput({
                     {showEmojiPicker && (
                         <Picker onEmojiClick={handleEmojiClick} />
                     )}
-                    <Button
-                        className="btn-input"
-                        icon={<LinkOutlined />}
-                        type="text"
-                        size="large"
-                    ></Button>
+
+                    {/* <video
+                        src="https://appchat-picture-profile.s3.us-west-1.amazonaws.com/Our+complete+Apple+iPhone+XS+Max+review_1.mp4"
+                        width="600"
+                        height="300"
+                        controls="controls"
+                        autoplay="true"
+                    /> */}
+
+                    <input
+                        accept=".mp4,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                        multiple="multiple"
+                        onChange={fileSend}
+                        type="file"
+                        id="picFile"
+                        className="hide"
+                    ></input>
+                    <label htmlFor="picFile" className="btn-input">
+                        <LinkOutlined />
+                    </label>
+
                     <div className="file hover-image">
                         <input
+                            accept="image/x-png,image/gif,image/jpeg"
+                            multiple="multiple"
                             onChange={imageSend}
                             type="file"
                             id="pic"
-                            className="hide"
-                        />
+                        ></input>
+
                         <label htmlFor="pic">
-                            <DiDatabase />
+                            <PictureOutlined />
                         </label>
                     </div>
-                    {/* <Button
-                        className="btn-input"
-                        icon={<PictureOutlined />}
-                        type="text"
-                        size="large"
-                        // onClick={}
-                    ></Button> */}
+
                     <Button
                         className="emoji btn-input"
                         icon={<SmileOutlined />}

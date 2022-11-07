@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Avatar, Typography } from "antd";
 import { formatRelative } from "date-fns/esm";
 import "./style.css";
+import fi from "date-fns/esm/locale/fi/index.js";
 
 function formatDate(seconds) {
     let formattedDate = "";
@@ -25,17 +26,40 @@ export default function Message({
     messages,
     image,
     fromSelf,
+    files,
 }) {
+    const checkFileTypesByName = (array) => {
+        for (var i = 0; i < array.length; i++) {
+            var endPoint = array[i].split(".");
+            var ext = endPoint[endPoint.length - 1];
+            switch (ext.toLowerCase()) {
+                case "mp4":
+                case "video":
+                    //etc
+                    return true;
+            }
+        }
+        return false;
+    };
+    // console.log(image);
+    const checkGroupImage = (image) => {
+        if (image.length >= 2) {
+            image.map((m, i) => {
+                console.log(m);
+            });
+            return true;
+        }
+
+        return false;
+    };
     const user = {
         uid: "123",
     };
 
-    // const { myInfo } = useSelector((state) => state.auth);
-    // console.log(fromSelf);
-
     const handlePreviewImage = (e) => {
         const image = URL.createObjectURL();
     };
+
     return (
         <div className="message">
             <div className={`${user.uid === mesUid ? "m-msg" : "msg"}`}>
@@ -48,22 +72,48 @@ export default function Message({
                 )}
 
                 <div className="content">
-                    {/* <Typography.Text className="message-author">
-                        {displayName}
-                    </Typography.Text> */}
-
-                    {/* <Typography.Text className="message-text"> */}
                     {text === "" ? (
                         <div>
-                            {/* <img src="blob:http://localhost:3000/3b86edce-11c4-4807-880c-9d9f5454684c"></img> */}
-                            <img className="imgmess" src={image} alt="image" />
-                            {/* <p>{image}</p> */}
+                            {files === null || files === "" ? (
+                                <div>
+                                    {checkGroupImage(image) === false ? (
+                                        <img
+                                            className="imgmess"
+                                            src={image}
+                                            alt="image"
+                                        />
+                                    ) : (
+                                        <div>
+                                            {image.map((m) => (
+                                                <img
+                                                    className="imgmess"
+                                                    src={m}
+                                                    alt="image"
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div>
+                                    {checkFileTypesByName(files) === false ? (
+                                        <a href="files">{files}</a>
+                                    ) : (
+                                        <video
+                                            autoplay="false"
+                                            muted="true"
+                                            src={files}
+                                            width="300"
+                                            height="200"
+                                            controls="controls"
+                                        />
+                                    )}
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <h3>{text}</h3>
                     )}
-                    {/* </Typography.Text> */}
-
                     <Typography.Text className="message-date">
                         {createdAt}
                     </Typography.Text>
